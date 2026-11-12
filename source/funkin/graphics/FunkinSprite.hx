@@ -796,6 +796,10 @@ class FunkinSprite extends FlxAnimate
 
   function set_filters(value:Null<Array<BitmapFilter>>):Null<Array<BitmapFilter>>
   {
+    #if LITE_BUILD
+    // Filters need an extra render texture per sprite, too expensive for low-end devices.
+    value = null;
+    #end
     if (filters != value) _renderTextureDirty = true;
     filters = value;
     return value;

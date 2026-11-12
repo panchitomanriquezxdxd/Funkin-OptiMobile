@@ -30,7 +30,12 @@ class FunkinMemory
    */
   public static inline function initialCache():Void
   {
+    #if LITE_BUILD
+    // On low-RAM devices, don't keep every UI texture permanently in memory; they are loaded on demand instead.
+    var allImages:Array<String> = [];
+    #else
     var allImages:Array<String> = Assets.list();
+    #end
 
     for (file in allImages)
     {

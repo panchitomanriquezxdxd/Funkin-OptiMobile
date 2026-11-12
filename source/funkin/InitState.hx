@@ -147,7 +147,12 @@ class InitState extends FlxState
       SongEventHelper.generateEaseGraphsBitmaps();
 
       // This ain't a pixel art game! (most of the time)
+      // LITE_BUILD turns smoothing off to save GPU fill-rate on weak devices.
+      #if LITE_BUILD
+      FlxSprite.defaultAntialiasing = false;
+      #else
       FlxSprite.defaultAntialiasing = true;
+      #end
 
       // Disable default keybinds for volume (we manually control volume in MusicBeatState with custom binds)
       FlxG.sound.volumeUpKeys = [];

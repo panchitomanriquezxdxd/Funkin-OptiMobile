@@ -877,7 +877,8 @@ class Project extends HXProject
     //
 
     FEATURE_FUNKVIS.apply(this, true);
-    FEATURE_LOG_TRACE.apply(this, true);
+    // LITE_BUILD strips all trace() calls, they cost CPU time on weak devices.
+    FEATURE_LOG_TRACE.apply(this, !LITE_BUILD.isEnabled(this));
     FEATURE_DEBUG_FILE_LOGGING.apply(this, FEATURE_DEBUG_FUNCTIONS.isEnabled(this));
     FEATURE_NAUGHTYNESS.apply(this, true);
     FEATURE_OPEN_URL.apply(this, true);
@@ -1033,9 +1034,13 @@ class Project extends HXProject
     setHaxedef("lime_disable_assets_version");
 
     // Enable stack trace tracking. Good for debugging but has a (minor) performance impact.
-    setHaxedef("HXCPP_CHECK_POINTER");
-    setHaxedef("HXCPP_STACK_LINE");
-    setHaxedef("HXCPP_STACK_TRACE");
+    // LITE_BUILD skips these: they add overhead to every function call.
+    if (LITE_BUILD.isDisabled(this))
+    {
+      setHaxedef("HXCPP_CHECK_POINTER");
+      setHaxedef("HXCPP_STACK_LINE");
+      setHaxedef("HXCPP_STACK_TRACE");
+    }
     setHaxedef("hscriptPos");
 
     if (FEATURE_DEBUG_FUNCTIONS.isDisabled(this))
@@ -1086,7 +1091,9 @@ class Project extends HXProject
   {
     // Disable dead code elimination.
     // This prevents functions that are unused by the base game from being unavailable to HScript.
-    addHaxeFlag("-dce no");
+    // LITE_BUILD uses `-dce std` to strip unused Haxe standard library code (smaller binary, less RAM).
+    // Funkin' classes are still force-included below. Mods that rely on unused Flixel/OpenFL classes may not work.
+    addHaxeFlag(LITE_BUILD.isEnabled(this) ? "-dce std" : "-dce no");
 
     // Forcibly include all Funkin' classes in builds.
     // This prevents classes that are unused by the base game from being unavailable to HScript.
